@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phát Hiện Stress từ Reddit</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .info-header {
+            background: #ffffff;
+            padding: 25px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #1677ff;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+            margin-bottom: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-img {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .header-content {
+            text-align: center;
+            color: #2c3e50;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .info-header h2 { 
+            color: #1677ff; 
+            margin-bottom: 15px; 
+            font-size: 1.8rem; 
+            font-weight: 700;
+        }
+
+        .info-header p { 
+            margin: 8px 0; 
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .info-header strong { 
+            color: #1677ff; 
+        }
+
+        .info-header hr { 
+            margin: 20px auto; 
+            width: 100px; 
+            border: none; 
+            border-top: 3px solid #1677ff; 
+            border-radius: 3px;
+        }
+
+        .info-header ul { 
+            list-style: none; 
+            display: inline-block; 
+            text-align: left; 
+            margin: 10px 0;
+        }
+
+        .info-header ul li { 
+            padding: 5px 0; 
+            color: #555;
+        }
+
+        .info-header ul li::before {
+            content: "▸ ";
+            color: #1677ff;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px;
+        }
+
+        .app-container { 
+            max-width: 950px; 
+            margin: 0 auto 50px; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+        }
+
+        h1 { 
+            text-align: center; 
+            color: #1677ff; 
+            margin-bottom: 10px; 
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .input-section {
+            background: #f8faff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #e6f0ff;
+        }
+
+        textarea { 
+            width: 100%; 
+            height: 180px; 
+            padding: 16px; 
+            font-size: 16px; 
+            border: 2px solid #d9e6ff; 
+            border-radius: 12px; 
+            resize: vertical; 
+            margin-bottom: 15px;
+            font-family: inherit;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #1677ff;
+            box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+        }
+
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        label { 
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            color: #555;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        label:hover {
+            color: #1677ff;
+        }
+
+        input[type="checkbox"] { 
+            margin-right: 8px; 
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .word-count {
+            color: #888;
+            font-size: 14px;
+        }
+
+        button { 
+            width: 100%; 
+            padding: 18px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(22, 119, 255, 0.3);
+        }
+
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(22, 119, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #result { 
+            margin-top: 30px; 
+        }
+
+        .result-box { 
+            padding: 25px; 
+            background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%); 
+            border-radius: 15px; 
+            animation: fadeIn 0.5s;
+            border-left: 6px solid;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .result-box h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-icon {
+            font-size: 2rem;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1677ff, #0958d9);
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1677ff;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .highlighted-text {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.8;
+            font-size: 1.05rem;
+            margin: 15px 0;
+            border: 1px solid #e6f0ff;
+        }
+
+        .highlight { 
+            background: linear-gradient(120deg, #fff3cd 0%, #ffe69c 100%);
+            color: #d32f2f; 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .highlight:hover {
+            transform: scale(1.05);
+        }
+
+        .keywords-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            border-left: 4px solid #1677ff;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background: #1677ff;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9rem;
+            transition: transform 0.2s ease;
+        }
+
+        .keyword-tag:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 25px;
+            padding: 30px;
+            background: #f8faff;
+            border-radius: 15px;
+        }
+
+        .hidden { 
+            display: none; 
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e6f0ff;
+            border-top: 5px solid #1677ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+        }
+
+        .loading p {
+            color: #1677ff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin { 
+            100% { transform: rotate(360deg); } 
+        }
+
+        .history-box {
+            margin-top: 40px;
+            background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .history-box h3 { 
+            margin-bottom: 20px; 
+            color: #1677ff; 
+            text-align: center;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .history-box ul { 
+            list-style: none; 
+            line-height: 2; 
+            font-size: 0.95rem; 
+        }
+
+        .history-box li {
+            padding: 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #1677ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-box li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(22, 119, 255, 0.15);
+        }
+
+        .clear-history {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px);
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            } 
+        }
+
+        @media (max-width: 768px) {
+            .header-top {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .logo-container {
+                flex-direction: column;
+            }
+
+            .app-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="info-header">
+    <div class="header-top">
+        <div class="logo-container">
+            <img src="../static/tentruong.jpg" alt="Logo Trường" class="logo-img">
+        </div>
+    </div>
+    
+    <div class="header-content">
+        <p><strong>Ngành:</strong> Thạc sĩ Khoa học Máy tính</p>
+        <p><strong>Đề tài:</strong> Phân loại bài đăng stress trên mạng xã hội</p>
+        <hr>
+        <p><strong>Sinh viên thực hiện:</strong></p>
+        <ul>
+            <li>Lê Nguyễn Tuấn Kiệt - 2951311</li>
+            <li>Trần Minh Sang - 2591322</li>
+            <li>Huỳnh Đình Hiệp - 2591303</li>
+        </ul>
+        <p><strong>Giảng viên hướng dẫn:</strong><br>PGS. TS. Hoàng Văn Dũng</p>
+    </div>
+</header>
+
+<div class="container app-container">
+    <h1>🧠 Phát Hiện Stress từ Reddit</h1>
+    <p class="subtitle">Công nghệ AI phân tích tâm lý từ nội dung bài đăng</p>
+
+    <div class="input-section">
+        <textarea id="text" placeholder="Nhập nội dung bài đăng Reddit để phân tích...&#10;&#10;Ví dụ: I can't sleep anymore, my job is killing me and I feel so anxious all the time..."></textarea>
+        
+        <div class="options-row">
+            <label>
+                <input type="checkbox" id="explain"> Giải thích chi tiết bằng LIME
+            </label>
+            <span class="word-count" id="wordCount">0 từ</span>
+        </div>
+    </div>
+
+    <button onclick="predict()" id="analyzeBtn">
+        <span>🔍 Phân Tích Ngay</span>
+    </button>
+
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Đang phân tích tâm lý... vui lòng chờ</p>
+    </div>
+
+    <div id="result"></div>
+
+    <div id="history" class="history-box">
+        <h3>📋 Lịch sử phân tích gần đây</h3>
+        <ul id="history-list"></ul>
+        <button class="clear-history" onclick="clearHistory()">🗑️ Xóa lịch sử</button>
+    </div>
+</div>
+
+<script>
+// Đếm số từ
+document.getElementById("text").addEventListener("input", function() {
+    const text = this.value.trim();
+    const wordCount = text ? text.split(/\s+/).length : 0;
+    document.getElementById("wordCount").textContent = `${wordCount} từ`;
+});
+
+async function predict() {
+    const text = document.getElementById("text").value.trim();
+    const explain = document.getElementById("explain").checked;
+    const resultDiv = document.getElementById("result");
+    const loadingDiv = document.getElementById("loading");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+
+    if (!text) {
+        resultDiv.innerHTML = `
+            <div class="result-box" style="border-left-color: #ff9800;">
+                <p style="color: #ff9800; text-align: center;">⚠️ Vui lòng nhập nội dung để phân tích!</p>
+            </div>
+        `;
+        return;
+    }
+
+    resultDiv.innerHTML = "";
+    loadingDiv.classList.remove("hidden");
+    analyzeBtn.disabled = true;
+
+    try {
+        const res = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, explain })
+        });
+        const data = await res.json();
+        loadingDiv.classList.add("hidden");
+        analyzeBtn.disabled = false;
+
+        if (data.error) {
+            resultDiv.innerHTML = `
+                <div class="result-box" style="border-left-color: #ff4d4f;">
+                    <p style="color: #ff4d4f; text-align: center;">❌ Lỗi: ${data.error}</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Highlight từ khóa
+        let highlightedText = data.text;
+        if (data.highlight_words && data.highlight_words.length > 0) {
+            const escaped = data.highlight_words.map(w =>
+                w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            );
+            const regex = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+            highlightedText = data.text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        const icon = data.prediction.includes("Stress") ? "😰" : "😊";
+        const confidencePercent = parseFloat(data.confidence);
+
+        const html = `
+            <div class="result-box" style="border-left-color: ${data.color};">
+                <h2 style="color: ${data.color};">
+                    <span class="result-icon">${icon}</span>
+                    ${data.prediction}
+                </h2>
+                
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: ${confidencePercent}%; background: ${data.color};">
+                        ${data.confidence}
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #ff4d4f;">${data.prob_stress}</div>
+                        <div class="stat-label">Khả năng Stress</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #52c41a;">${data.prob_normal}</div>
+                        <div class="stat-label">Khả năng Bình thường</div>
+                    </div>
+                </div>
+
+                <hr style="margin: 20px 0; border: none; border-top: 2px solid #f0f0f0;">
+                
+                <h4 style="margin-bottom: 10px; color: #333;">📝 Nội dung đã phân tích:</h4>
+                <div class="highlighted-text">${highlightedText}</div>
+                
+                ${data.highlight_words && data.highlight_words.length > 0 ? `
+                    <div class="keywords-section">
+                        <strong style="color: #1677ff;">🔑 Từ khóa gợi ý stress:</strong><br>
+                        ${data.highlight_words.map(w => `<span class="keyword-tag">${w}</span>`).join('')}
+                    </div>
+                ` : (explain ? `<p style="text-align: center; color: #888; margin-top: 15px;"><small>Không phát hiện từ khóa đáng chú ý.</small></p>` : "")}
+            </div>
+        `;
+        resultDiv.innerHTML = html;
+
+        // Lưu lịch sử
+        saveToHistory(data);
+
+    } catch (e) {
+        loadingDiv.classList.add("hidden");
+        analyzeBtn.disabled = false;
+        resultDiv.innerHTML = `
+            <div class="result-box" style="border-left-color: #ff4d4f;">
+                <p style="color: #ff4d4f; text-align: center;">❌ Lỗi kết nối! Vui lòng thử lại.</p>
+            </div>
+        `;
+    }
+}
+
+function saveToHistory(data) {
+    let history = JSON.parse(localStorage.getItem("analysis_history") || "[]");
+    history.unshift({ 
+        text: data.text, 
+        prediction: data.prediction, 
+        color: data.color,
+        confidence: data.confidence,
+        timestamp: new Date().toLocaleString('vi-VN')
+    });
+    history = history.slice(0, 5);
+    localStorage.setItem("analysis_history", JSON.stringify(history));
+    renderHistory();
+}
+
+function renderHistory() {
+    const history = JSON.parse(localStorage.getItem("analysis_history") || "[]");
+    const list = document.getElementById("history-list");
+    
+    if (history.length === 0) {
+        list.innerHTML = '<li style="text-align: center; color: #888; border: none;">Chưa có lịch sử phân tích</li>';
+        return;
+    }
+    
+    list.innerHTML = history.map((item, index) => `
+        <li onclick="loadFromHistory(${index})">
+            <span style="color:${item.color}; font-weight:bold; font-size: 1.1rem;">${item.prediction}</span>
+            <span style="color: #888; font-size: 0.85rem; margin-left: 10px;">(${item.confidence})</span>
+            <br>
+            <span style="color: #666;">${item.text.substring(0, 100)}${item.text.length > 100 ? '...' : ''}</span>
+            <br>
+            <small style="color: #999;">⏰ ${item.timestamp}</small>
+        </li>
+    `).join("");
+}
+
+function loadFromHistory(index) {
+    const history = JSON.parse(localStorage.getItem("analysis_history") || "[]");
+    if (history[index]) {
+        document.getElementById("text").value = history[index].text;
+        document.getElementById("text").dispatchEvent(new Event('input'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function clearHistory() {
+    if (confirm("Bạn có chắc muốn xóa toàn bộ lịch sử?")) {
+        localStorage.removeItem("analysis_history");
+        renderHistory();
+    }
+}
+
+// Tải lại lịch sử khi mở trang
+renderHistory();
+
+// Enter để submit (Ctrl/Cmd + Enter)
+document.getElementById("text").addEventListener("keydown", function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        predict();
+    }
+});
+</script>
+</body>
+</html>
